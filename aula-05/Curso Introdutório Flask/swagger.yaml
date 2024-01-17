@@ -1,0 +1,234 @@
+swagger: '2.0'
+info:
+  version: 1.0.0
+  title: E-commerce API
+  description: API for an e-commerce system
+host: 127.0.0.1:5000
+schemes:
+  - http
+
+paths:
+
+  /login:
+    post:
+      summary: Log in
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              username:
+                type: string
+              password:
+                type: string
+      responses:
+        200:
+          headers: 
+            Set-Cookie:
+              type: string
+
+          description: Logged in successfully
+
+        401:
+          description: Unauthorized. Invalid credentials
+
+  /logout:
+    post:
+      summary: Log out
+      responses:
+        200:
+          description: Logout successfully
+        401:
+          description: Unauthorized. Invalid credentials
+  
+  /api/products:
+    get:
+      summary: Get a list of products
+      responses:
+        200:
+          description: Returns a list of products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        404:
+          description: Not Found. No products available.
+
+  /api/products/{product_id}:
+    get:
+      summary: Get product details by ID
+      parameters:
+        - name: product_id
+          in: path
+          type: integer
+          required: true
+          description: Product ID to retrieve details
+      responses:
+        200:
+          description: Returns product details
+          schema:
+            $ref: '#/definitions/Product'
+        404:
+          description: Not Found. Product not available.
+
+  /api/products/search:
+    get:
+      summary: Search for products
+      parameters:
+        - name: q
+          in: query
+          type: string
+          required: true
+          description: Search query
+      responses:
+        200:
+          description: Returns a list of products matching the search query
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Product'
+        404:
+          description: Not Found. No products found for the search query.
+
+  /api/products/add:
+    post:
+      summary: Add a new product
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Product'
+      responses:
+        201:
+          description: Product added successfully
+        400:
+          description: Failed to add the product
+
+  /api/products/update/{product_id}:
+    put:
+      summary: Update a product by ID
+      parameters:
+        - name: product_id
+          in: path
+          type: integer
+          required: true
+          description: Product ID to update
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Product'
+      responses:
+        200:
+          description: Product updated successfully
+        404:
+          description: Not Found. Product not available
+        400:
+          description: Failed to update the product
+
+  /api/products/delete/{product_id}:
+    delete:
+      summary: Delete a product by ID
+      parameters:
+        - name: product_id
+          in: path
+          type: integer
+          required: true
+          description: Product ID to delete
+      responses:
+        200:
+          description: Product deleted successfully
+        404:
+          description: Not Found. Product not available
+
+  /api/cart/add/{product_id}:
+    post:
+      summary: Add item to the cart
+      parameters:
+        - name: product_id
+          in: path
+          type: integer
+          required: true
+          description: Product ID to add to the cart
+      responses:
+        200:
+          description: Item added to the cart successfully
+        400:
+          description: Failed to add item to the cart
+
+  /api/cart/remove/{item_id}:
+    delete:
+      summary: Remove item from the cart
+      parameters:
+        - name: item_id
+          in: path
+          type: integer
+          required: true
+          description: Cart item ID to remove from the cart
+      responses:
+        200:
+          description: Item removed from the cart successfully
+        400:
+          description: Failed to remove item from the cart
+
+  /api/cart:
+    get:
+      summary: View the user's cart
+      responses:
+        200:
+          description: Returns the user's cart contents
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/CartItem'
+        401:
+          description: Unauthorized. User not logged in
+
+  /api/cart/checkout:
+    post:
+      summary: Checkout and clear the cart
+      responses:
+        200:
+          description: Checkout successful. Cart has been cleared.
+        401:
+          description: Unauthorized. User not logged in
+
+definitions:
+  User:
+    type: object
+    properties:
+      id:
+        type: integer
+      username:
+        type: string
+      password:
+        type: string
+      cart:
+        type: array
+        items:
+          $ref: '#/definitions/CartItem'
+
+  Product:
+    type: object
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      price:
+        type: number
+      description:
+        type: string
+
+  CartItem:
+    type: object
+    properties:
+      id:
+        type: integer
+      user_id:
+        type: integer
+      product_id:
+        type: integer
